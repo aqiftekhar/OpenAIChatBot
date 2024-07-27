@@ -10,21 +10,30 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/pdf-parse": "^1.1.4",
     "axios": "^1.7.2",
+    "formidable": "^3.5.1",
     "next": "^14.2.5",
     "openai": "^4.52.7",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.4.168",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.2.1",
+    "tesseract.js": "^5.1.0"
   },
   "devDependencies": {
+    "@types/formidable": "^3.4.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "ajv": "^8.17.1",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8",
+    "eslint": "^9.7.0",
     "eslint-config-next": "14.2.5",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "uri-js": "^4.4.1"
   }
 }

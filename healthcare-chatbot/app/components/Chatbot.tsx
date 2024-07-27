@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { AiOutlinePaperClip } from 'react-icons/ai';
+import axios from 'axios';
 
 const Chatbot = () => {
     const [messages, setMessages] = useState<{ text: string; user: boolean }[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
     const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -14,42 +17,56 @@ const Chatbot = () => {
     }, [messages]);
 
     const handleSend = async () => {
-        if (!input.trim()) return;
+        if (!input.trim() && !file) return;
 
         const userMessage = { text: input, user: true };
         setMessages([...messages, userMessage]);
 
         setLoading(true);
         try {
-            const botResponse = await getBotResponse(input);
+            let botResponse = '';
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                const uploadResponse = await axios.post('/api/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+
+                botResponse = uploadResponse.data;
+            } else {
+                botResponse = await getBotResponse(input);
+            }
+
             setMessages([...messages, userMessage, { text: botResponse, user: false }]);
         } catch (error: any) {
-            // console.error('Error fetching bot response:', error.message, error.stack);
             setMessages([...messages, userMessage, { text: 'Error fetching response. Please try again.', user: false }]);
         } finally {
             setInput('');
+            setFile(null);
             setLoading(false);
         }
     };
 
     const getBotResponse = async (input: string) => {
         try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
+            const response = await axios.post('/api/chat', { input }, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ input }),
             });
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`);
-            }
-
-            const data = await response.text();
-            return data;
+            return response.data;
         } catch (error) {
             throw error;
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setFile(e.target.files[0]);
         }
     };
 
@@ -73,8 +90,17 @@ const Chatbot = () => {
             <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg rounded-t-lg border-t border-gray-200 p-4">
                 <div className="flex items-center">
                     <input
+                        type="file"
+                        id="file-upload"
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                        <AiOutlinePaperClip className="text-gray-500" />
+                    </label>
+                    <input
                         type="text"
-                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ml-2"
                         placeholder="Type your message here"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}

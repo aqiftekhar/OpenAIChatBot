@@ -11,6 +11,10 @@ export const config = {
   },
 };
 
+export async function GET() {
+    return NextResponse.json({"message":"hello world"})
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { input } = await req.json();
